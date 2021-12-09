@@ -1,4 +1,4 @@
-import { Button, Box } from '@chakra-ui/react';
+import { Box, Button } from '@chakra-ui/react';
 import { useMemo } from 'react';
 import { useInfiniteQuery } from 'react-query';
 
@@ -7,6 +7,14 @@ import { CardList } from '../components/CardList';
 import { api } from '../services/api';
 import { Loading } from '../components/Loading';
 import { Error } from '../components/Error';
+
+function getPageData(pageParam?: number | string) {
+  return api.get("api/images", {
+    params: {
+      after: pageParam ?? 0
+    }
+  });
+};
 
 export default function Home(): JSX.Element {
   const {
@@ -18,27 +26,44 @@ export default function Home(): JSX.Element {
     hasNextPage,
   } = useInfiniteQuery(
     'images',
-    // TODO AXIOS REQUEST WITH PARAM
-    ,
-    // TODO GET AND RETURN NEXT PAGE PARAM
+    async({ pageParam = null }) => getPageData(pageParam),
+    {
+      getNextPageParam: lastPage => lastPage.data.after
+    }
   );
 
   const formattedData = useMemo(() => {
-    // TODO FORMAT AND FLAT DATA ARRAY
+    let images = data?.pages.flatMap(page => page.data.data);
+    return images ?? [];
   }, [data]);
 
-  // TODO RENDER LOADING SCREEN
-
-  // TODO RENDER ERROR SCREEN
+  if(isLoading) {
+    return ( 
+      <Loading/> 
+    );
+  } else if(isError) {
+    return ( 
+      <Error/>
+    );
+  };
 
   return (
     <>
       <Header />
 
       <Box maxW={1120} px={20} mx="auto" my={20}>
-        <CardList cards={formattedData} />
-        {/* TODO RENDER LOAD MORE BUTTON IF DATA HAS NEXT PAGE */}
-      </Box>
+        <CardList cards={formattedData}/>
+
+        { hasNextPage && <Button
+          isLoading={isFetchingNextPage}
+          name="Carregar mais"
+          loadingText='Carregando...'
+          onClick={() => fetchNextPage()}
+          mt={8}
+        >
+          Carregar mais
+        </Button> }
+    </Box>
     </>
   );
 }
