@@ -1,4 +1,5 @@
 {
+  "translatedDescription": "Quarto desafio realizado na trilha do React.js. Tem como objetivo colocar em prática o desenvolvimento de uma aplicação capaz de importar imagens. Foi utilizado nessa aplicação: React Query, React Hook Forms e o Chakra UI.",
   "technologies": [
     "Next.js",
     "React.js",
